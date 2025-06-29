@@ -9,7 +9,7 @@ export class TokenModel extends Model<TokenModel> {
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   })
-  declare tokenId: string;
+  declare id: string;
 
   @Column({
     type: DataTypes.STRING,

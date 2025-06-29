@@ -1,5 +1,5 @@
 export interface Token {
-  tokenId: string;
+  id: string;
   userWallet: string;
   tokenName: string;
   tokenSymbol: string;
@@ -15,7 +15,7 @@ export enum TokenSortField {
 }
 
 export interface ThreadMessageWithReplies {
-  threadMessageId: string;
+  id: string;
   tokenId: string;
   userWallet: string;
   message: string;
