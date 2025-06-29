@@ -9,7 +9,6 @@ import {
   ValidationPipe,
   UploadedFile,
   UseInterceptors,
-  Param,
   BadRequestException,
 } from '@nestjs/common';
 import { TokenService } from './token.service';
@@ -22,6 +21,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   CreateTokenThreadMessageDto,
   CreateTokenThreadMessageReplyDto,
+  GetTokenThreadMessageDto,
   LikeOrUnlikeTokenThreadMessageDto,
 } from './dto/thread-message.dto';
 
@@ -120,7 +120,7 @@ export class TokenController {
     }
   }
 
-  @Get('/:tokenId/thread')
+  @Get('/thread')
   @ApiOperation({
     summary: 'Get thread for a token',
   })
@@ -136,11 +136,11 @@ export class TokenController {
     description: 'Thread fetched successfully',
   })
   async getTokenThread(
-    @Param('tokenId') tokenId: string,
+    @Body() getTokenThreadMessageDto: GetTokenThreadMessageDto,
     @Query('order') order: SortOrder = SortOrder.DESC,
     @Res() response: Response,
   ): Promise<any> {
-    const result = await this.tokenService.getTokenThread(tokenId, order);
+    const result = await this.tokenService.getTokenThread(getTokenThreadMessageDto.tokenId, order);
     if (result.success === true) {
       response.status(200).json(result.data);
     } else {
@@ -148,7 +148,7 @@ export class TokenController {
     }
   }
 
-  @Post('/:tokenId/thread')
+  @Post('/thread')
   @ApiOperation({
     summary: 'Create a new message in the token thread',
   })
@@ -158,11 +158,10 @@ export class TokenController {
   })
   @UsePipes(new ValidationPipe())
   async createTokenThreadMessage(
-    @Param('tokenId') tokenId: string,
     @Body() createThreadMessageDto: CreateTokenThreadMessageDto,
     @Res() response: Response,
   ): Promise<any> {
-    const result = await this.tokenService.createTokenThreadMessage(tokenId, createThreadMessageDto);
+    const result = await this.tokenService.createTokenThreadMessage(createThreadMessageDto);
     if (result.success === true) {
       response.status(201).json({ message: 'Message created successfully' });
     } else {
@@ -170,7 +169,7 @@ export class TokenController {
     }
   }
 
-  @Post('/:tokenId/thread/:messageId/like')
+  @Post('/thread/like')
   @ApiOperation({
     summary: 'Like a message in the token thread. Use the same endpoint to unlike a message.',
   })
@@ -180,16 +179,10 @@ export class TokenController {
   })
   @UsePipes(new ValidationPipe())
   async likeOrUnlikeTokenThreadMessage(
-    @Param('tokenId') tokenId: string,
-    @Param('messageId') messageId: string,
     @Body() likeTokenThreadMessageDto: LikeOrUnlikeTokenThreadMessageDto,
     @Res() response: Response,
   ): Promise<any> {
-    const result = await this.tokenService.likeOrUnlikeTokenThreadMessage(
-      tokenId,
-      messageId,
-      likeTokenThreadMessageDto.userWallet,
-    );
+    const result = await this.tokenService.likeOrUnlikeTokenThreadMessage(likeTokenThreadMessageDto);
     if (result.success === true) {
       response.status(201).json({ message: 'Message liked/unliked successfully' });
     } else {
@@ -197,7 +190,7 @@ export class TokenController {
     }
   }
 
-  @Post('/:tokenId/thread/:messageId/reply')
+  @Post('/thread/reply')
   @ApiOperation({
     summary: 'Reply to a message in the token thread',
   })
@@ -206,16 +199,10 @@ export class TokenController {
     description: 'Reply created successfully',
   })
   async createTokenThreadMessageReply(
-    @Param('tokenId') tokenId: string,
-    @Param('messageId') messageId: string,
     @Body() createThreadMessageReplyDto: CreateTokenThreadMessageReplyDto,
     @Res() response: Response,
   ): Promise<any> {
-    const result = await this.tokenService.createTokenThreadMessageReply(
-      tokenId,
-      messageId,
-      createThreadMessageReplyDto,
-    );
+    const result = await this.tokenService.createTokenThreadMessageReply(createThreadMessageReplyDto);
     if (result.success === true) {
       response.status(201).json({ message: 'Reply created successfully' });
     } else {

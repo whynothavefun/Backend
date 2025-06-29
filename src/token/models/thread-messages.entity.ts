@@ -9,7 +9,7 @@ export class ThreadMessageModel extends Model<ThreadMessageModel> {
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   })
-  declare threadMessageId: string;
+  declare id: string;
 
   @Column({
     type: DataTypes.UUID,

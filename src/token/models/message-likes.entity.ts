@@ -11,7 +11,7 @@ export class MessageLikesModel extends Model<MessageLikesModel> {
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   })
-  declare messageLikeId: string;
+  declare id: string;
 
   @ForeignKey(() => ThreadMessageModel)
   @Column({

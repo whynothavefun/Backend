@@ -6,7 +6,11 @@ import { TokenSortField, Token } from 'src/common/types/token';
 import { SortOrder } from 'src/common/types/sort';
 import { ThreadMessageWithReplies } from 'src/common/types/token';
 import { ThreadMessageModel } from 'src/token/models/thread-messages.entity';
-import { CreateTokenThreadMessageDto, CreateTokenThreadMessageReplyDto } from './dto/thread-message.dto';
+import {
+  CreateTokenThreadMessageDto,
+  CreateTokenThreadMessageReplyDto,
+  LikeOrUnlikeTokenThreadMessageDto,
+} from './dto/thread-message.dto';
 import { uploadToPinata } from '../pinata/index';
 import { Sequelize } from 'sequelize-typescript';
 import { MessageLikesModel } from 'src/token/models/message-likes.entity';
@@ -82,13 +86,15 @@ export class TokenService {
     }
   }
 
-  async createTokenThreadMessage(
-    tokenId: string,
-    createThreadMessageDto: CreateTokenThreadMessageDto,
-  ): Promise<ApiResponse> {
+  async createTokenThreadMessage(createThreadMessageDto: CreateTokenThreadMessageDto): Promise<ApiResponse> {
     try {
+      const tokenExists = await this.checkTokenExists(createThreadMessageDto.tokenId);
+      if (!tokenExists.success) {
+        return tokenExists;
+      }
+
       await this.threadMessageModel.create({
-        tokenId,
+        tokenId: createThreadMessageDto.tokenId,
         message: createThreadMessageDto.message,
         userWallet: createThreadMessageDto.userWallet,
       });
@@ -98,22 +104,32 @@ export class TokenService {
     }
   }
 
-  async likeOrUnlikeTokenThreadMessage(tokenId: string, messageId: string, userWallet: string): Promise<ApiResponse> {
+  async likeOrUnlikeTokenThreadMessage(
+    likeTokenThreadMessageDto: LikeOrUnlikeTokenThreadMessageDto,
+  ): Promise<ApiResponse> {
     try {
       const messageLike = await this.messageLikesModel.findOne({
         where: {
-          messageId: messageId,
-          tokenId: tokenId,
-          userWallet: userWallet,
+          messageId: likeTokenThreadMessageDto.messageId,
+          tokenId: likeTokenThreadMessageDto.tokenId,
+          userWallet: likeTokenThreadMessageDto.userWallet,
         },
       });
+      const tokenExists = await this.checkTokenExists(likeTokenThreadMessageDto.tokenId);
+      if (!tokenExists.success) {
+        return tokenExists;
+      }
+      const messageExists = await this.checkMessageExists(likeTokenThreadMessageDto.messageId);
+      if (!messageExists.success) {
+        return messageExists;
+      }
 
       if (messageLike) {
         await this.messageLikesModel.destroy({
           where: {
-            messageId: messageId,
-            tokenId: tokenId,
-            userWallet: userWallet,
+            messageId: likeTokenThreadMessageDto.messageId,
+            tokenId: likeTokenThreadMessageDto.tokenId,
+            userWallet: likeTokenThreadMessageDto.userWallet,
           },
         });
         await this.threadMessageModel.update(
@@ -122,16 +138,16 @@ export class TokenService {
           },
           {
             where: {
-              threadMessageId: messageId,
+              id: likeTokenThreadMessageDto.messageId,
             },
           },
         );
         return { success: true };
       } else {
         await this.messageLikesModel.create({
-          messageId,
-          tokenId,
-          userWallet,
+          messageId: likeTokenThreadMessageDto.messageId,
+          tokenId: likeTokenThreadMessageDto.tokenId,
+          userWallet: likeTokenThreadMessageDto.userWallet,
         });
         await this.threadMessageModel.update(
           {
@@ -139,7 +155,7 @@ export class TokenService {
           },
           {
             where: {
-              threadMessageId: messageId,
+              id: likeTokenThreadMessageDto.messageId,
             },
           },
         );
@@ -151,14 +167,21 @@ export class TokenService {
   }
 
   async createTokenThreadMessageReply(
-    tokenId: string,
-    messageId: string,
     createThreadMessageReplyDto: CreateTokenThreadMessageReplyDto,
   ): Promise<ApiResponse> {
     try {
+      const tokenExists = await this.checkTokenExists(createThreadMessageReplyDto.tokenId);
+      if (!tokenExists.success) {
+        return tokenExists;
+      }
+      const messageExists = await this.checkMessageExists(createThreadMessageReplyDto.messageId);
+      if (!messageExists.success) {
+        return messageExists;
+      }
+
       await this.threadMessageModel.create({
-        tokenId,
-        parentId: messageId,
+        tokenId: createThreadMessageReplyDto.tokenId,
+        parentId: createThreadMessageReplyDto.messageId,
         message: createThreadMessageReplyDto.message,
         userWallet: createThreadMessageReplyDto.userWallet,
       });
@@ -183,11 +206,11 @@ export class TokenService {
         ...msg,
         replies: [],
       };
-      map.set(msg.threadMessageId, messageWithReplies);
+      map.set(msg.id, messageWithReplies);
     }
 
     for (const msg of messages) {
-      const messageWithReplies = map.get(msg.threadMessageId);
+      const messageWithReplies = map.get(msg.id);
 
       if (msg.parentId) {
         const parent = map.get(msg.parentId);
@@ -200,5 +223,37 @@ export class TokenService {
     }
 
     return roots;
+  }
+
+  async checkTokenExists(tokenId: string): Promise<ApiResponse> {
+    try {
+      const token = await this.tokenModel.findOne({
+        where: {
+          id: tokenId,
+        },
+      });
+      if (!token) {
+        return { success: false, error: 'Token not found' };
+      }
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error };
+    }
+  }
+
+  async checkMessageExists(messageId: string): Promise<ApiResponse> {
+    try {
+      const message = await this.threadMessageModel.findOne({
+        where: {
+          id: messageId,
+        },
+      });
+      if (!message) {
+        return { success: false, error: 'Message not found' };
+      }
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error };
+    }
   }
 }
