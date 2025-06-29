@@ -1,10 +1,10 @@
 import * as Joi from 'joi';
 
 export const validationSchema = Joi.object({
-  PORT: Joi.number().default(),
+  PORT: Joi.number(),
 
   PG_HOST: Joi.string().required(),
-  PG_PORT: Joi.number().default(),
+  PG_PORT: Joi.number(),
   PG_USER: Joi.string().required(),
   PG_PASSWORD: Joi.string().required(),
   PG_DATABASE: Joi.string().required(),
