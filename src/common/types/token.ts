@@ -4,9 +4,6 @@ export interface Token {
   tokenName: string;
   tokenSymbol: string;
   artwork: string;
-  mcap: number;
-  volume_24h: number;
-  price_change_24h: number;
   createdAt: Date;
 }
 

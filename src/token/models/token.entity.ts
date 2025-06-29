@@ -36,24 +36,6 @@ export class TokenModel extends Model<TokenModel> {
   artwork: string;
 
   @Column({
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  })
-  mcap: number;
-
-  @Column({
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
-  })
-  volume_24h: number;
-
-  @Column({
-    type: DataTypes.DOUBLE,
-    defaultValue: 0,
-  })
-  price_change_24h: number;
-
-  @Column({
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   })
