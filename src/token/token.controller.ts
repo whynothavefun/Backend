@@ -44,7 +44,7 @@ export class TokenController {
     description: 'Field to sort tokens by (mcap, volume_24h, price_change_24h, createdAt)',
     enum: TokenSortField,
     required: false,
-    example: TokenSortField.MCAP,
+    example: TokenSortField.CREATED_AT,
   })
   @ApiQuery({
     name: 'order',
@@ -60,7 +60,7 @@ export class TokenController {
   async getAllTokens(
     @Res() response: Response,
     @Query('q') searchQuery?: string,
-    @Query('sortBy') sortBy: TokenSortField = TokenSortField.MCAP,
+    @Query('sortBy') sortBy: TokenSortField = TokenSortField.CREATED_AT,
     @Query('order') order: SortOrder = SortOrder.DESC,
   ): Promise<any> {
     const result = await this.tokenService.getAllTokens(sortBy, order, searchQuery);

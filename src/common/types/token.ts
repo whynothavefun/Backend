@@ -8,9 +8,9 @@ export interface Token {
 }
 
 export enum TokenSortField {
-  MCAP = 'mcap',
-  VOLUME_24H = 'volume_24h',
-  PRICE_CHANGE_24H = 'price_change_24h',
+  // MCAP = 'mcap',
+  // VOLUME_24H = 'volume_24h',
+  // PRICE_CHANGE_24H = 'price_change_24h',
   CREATED_AT = 'createdAt',
 }
 
