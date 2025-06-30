@@ -42,6 +42,7 @@
     "no-console": ["warn", { "allow": ["log", "warn", "error"] }],
     "sonarjs/no-redundant-jump": "warn",
     "sonarjs/no-small-switch": "warn",
+    "sonarjs/pseudo-random": "off",
     "sonarjs/prefer-immediate-return": "warn",
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/explicit-function-return-type": "off",

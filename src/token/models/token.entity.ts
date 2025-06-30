@@ -30,7 +30,7 @@ export class TokenModel extends Model<TokenModel> {
   tokenSymbol: string;
 
   @Column({
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   })
   artwork: string;

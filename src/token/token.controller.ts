@@ -9,7 +9,7 @@ import {
   ValidationPipe,
   UploadedFile,
   UseInterceptors,
-  BadRequestException,
+  Param,
 } from '@nestjs/common';
 import { TokenService } from './token.service';
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
@@ -21,7 +21,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   CreateTokenThreadMessageDto,
   CreateTokenThreadMessageReplyDto,
-  GetTokenThreadMessageDto,
   LikeOrUnlikeTokenThreadMessageDto,
 } from './dto/thread-message.dto';
 
@@ -85,16 +84,12 @@ export class TokenController {
         tokenSymbol: { type: 'string' },
         userWallet: { type: 'string' },
       },
-      required: ['tokenName', 'tokenSymbol', 'artwork', 'userWallet'],
+      required: ['tokenName', 'tokenSymbol', 'userWallet'],
     },
   })
   @ApiResponse({
     status: 201,
     description: 'Token created successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request - Artwork file is required',
   })
   @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('artwork'))
@@ -108,10 +103,6 @@ export class TokenController {
     @Body() tokenInfo: CreateTokenDto,
     @Res() response: Response,
   ): Promise<any> {
-    if (!artwork) {
-      throw new BadRequestException('Artwork file is required');
-    }
-
     const result = await this.tokenService.createToken(artwork, tokenInfo);
     if (result.success === true) {
       response.status(201).json({ message: 'Token created successfully' });
@@ -120,7 +111,7 @@ export class TokenController {
     }
   }
 
-  @Get('/thread')
+  @Get('/:tokenId/thread')
   @ApiOperation({
     summary: 'Get thread for a token',
   })
@@ -136,11 +127,11 @@ export class TokenController {
     description: 'Thread fetched successfully',
   })
   async getTokenThread(
-    @Body() getTokenThreadMessageDto: GetTokenThreadMessageDto,
+    @Param('tokenId') tokenId: string,
     @Query('order') order: SortOrder = SortOrder.DESC,
     @Res() response: Response,
   ): Promise<any> {
-    const result = await this.tokenService.getTokenThread(getTokenThreadMessageDto.tokenId, order);
+    const result = await this.tokenService.getTokenThread(tokenId, order);
     if (result.success === true) {
       response.status(200).json(result.data);
     } else {
@@ -156,6 +147,10 @@ export class TokenController {
     status: 201,
     description: 'Message created successfully',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Token not found',
+  })
   @UsePipes(new ValidationPipe())
   async createTokenThreadMessage(
     @Body() createThreadMessageDto: CreateTokenThreadMessageDto,
@@ -165,7 +160,11 @@ export class TokenController {
     if (result.success === true) {
       response.status(201).json({ message: 'Message created successfully' });
     } else {
-      response.status(500).json({ message: `Internal Server Error: ${result.error}` });
+      if (result.error === 'Token not found') {
+        response.status(404).json({ message: result.error });
+      } else {
+        response.status(500).json({ message: `Internal Server Error: ${result.error}` });
+      }
     }
   }
 
@@ -177,6 +176,10 @@ export class TokenController {
     status: 201,
     description: 'Message liked successfully',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Token or message not found',
+  })
   @UsePipes(new ValidationPipe())
   async likeOrUnlikeTokenThreadMessage(
     @Body() likeTokenThreadMessageDto: LikeOrUnlikeTokenThreadMessageDto,
@@ -186,7 +189,11 @@ export class TokenController {
     if (result.success === true) {
       response.status(201).json({ message: 'Message liked/unliked successfully' });
     } else {
-      response.status(500).json({ message: `Internal Server Error: ${result.error}` });
+      if (result.error === 'Token not found' || result.error === 'Message not found') {
+        response.status(404).json({ message: result.error });
+      } else {
+        response.status(500).json({ message: `Internal Server Error: ${result.error}` });
+      }
     }
   }
 
@@ -198,6 +205,10 @@ export class TokenController {
     status: 201,
     description: 'Reply created successfully',
   })
+  @ApiResponse({
+    status: 404,
+    description: 'Token or message not found',
+  })
   async createTokenThreadMessageReply(
     @Body() createThreadMessageReplyDto: CreateTokenThreadMessageReplyDto,
     @Res() response: Response,
@@ -206,7 +217,11 @@ export class TokenController {
     if (result.success === true) {
       response.status(201).json({ message: 'Reply created successfully' });
     } else {
-      response.status(500).json({ message: `Internal Server Error: ${result.error}` });
+      if (result.error === 'Token not found' || result.error === 'Message not found') {
+        response.status(404).json({ message: result.error });
+      } else {
+        response.status(500).json({ message: `Internal Server Error: ${result.error}` });
+      }
     }
   }
 }
