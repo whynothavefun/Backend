@@ -11,7 +11,7 @@ import {
   CreateTokenThreadMessageReplyDto,
   LikeOrUnlikeTokenThreadMessageDto,
 } from './dto/thread-message.dto';
-import { uploadToPinata } from '../pinata/index';
+import { uploadCustomArtworkToPinata, uploadDefaultArtworkToPinata } from '../pinata/index';
 import { Sequelize } from 'sequelize-typescript';
 import { MessageLikesModel } from 'src/token/models/message-likes.entity';
 import { ApiResponse } from 'src/common/types/api-response';
@@ -63,7 +63,12 @@ export class TokenService {
     createTokenDto: CreateTokenDto,
   ): Promise<ApiResponse> {
     try {
-      const artworkUrl = await uploadToPinata(artwork);
+      const artworkUrl = artwork
+        ? await uploadCustomArtworkToPinata(artwork, createTokenDto.userWallet)
+        : await uploadDefaultArtworkToPinata(
+            this.generateDefaultArtwork(createTokenDto.tokenSymbol),
+            createTokenDto.userWallet,
+          );
 
       await this.tokenModel.create({
         tokenName: createTokenDto.tokenName,
@@ -255,5 +260,22 @@ export class TokenService {
     } catch (error: any) {
       return { success: false, error: error };
     }
+  }
+
+  generateDefaultArtwork(tokenSymbol: string): string {
+    const colors = ['#FFA500', '#6495ED', '#DA70D6', '#DC143C', '#2E8B57', '#008B8B', '#808080', '#A0522D'];
+
+    const bgColor = colors[Math.floor(Math.random() * colors.length)];
+    const letters = tokenSymbol.slice(0, 4).toUpperCase();
+
+    return `
+    <svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="${bgColor}" />
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+            font-size="280" font-family="Arial, sans-serif" fill="#fff">
+        ${letters}
+      </text>
+    </svg>
+  `;
   }
 }
