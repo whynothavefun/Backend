@@ -95,11 +95,13 @@ export class TokenController {
   @UseInterceptors(FileInterceptor('artwork'))
   async createToken(
     @UploadedFile()
-    artwork: {
-      buffer: Buffer;
-      originalname: string;
-      mimetype: string;
-    },
+    artwork:
+      | {
+          buffer: Buffer;
+          originalname: string;
+          mimetype: string;
+        }
+      | undefined,
     @Body() tokenInfo: CreateTokenDto,
     @Res() response: Response,
   ): Promise<any> {

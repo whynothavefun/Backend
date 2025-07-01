@@ -55,11 +55,13 @@ export class TokenService {
   }
 
   async createToken(
-    artwork: {
-      buffer: Buffer;
-      originalname: string;
-      mimetype: string;
-    },
+    artwork:
+      | {
+          buffer: Buffer;
+          originalname: string;
+          mimetype: string;
+        }
+      | undefined,
     createTokenDto: CreateTokenDto,
   ): Promise<ApiResponse> {
     try {
