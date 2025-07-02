@@ -272,7 +272,7 @@ export class TokenService {
 
     return `
     <svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="${bgColor}" />
+      <rect width="1000" height="1000" fill="${bgColor}" />
       <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
             font-size="280" font-family="Arial, sans-serif" fill="#fff">
         ${letters}
