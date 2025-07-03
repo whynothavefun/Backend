@@ -16,6 +16,10 @@ export class TransactionService {
 
   async createRandomTransactionsForAllTokens(tokenId: string, count: number = 10): Promise<void> {
     const token = await this.tokenModel.findByPk(tokenId);
+    if (!token) {
+      throw new Error(`Token with ID ${tokenId} not found`);
+    }
+
     const allTransactions = [];
     for (let i = 0; i < count; i++) {
       allTransactions.push({
@@ -34,8 +38,18 @@ export class TransactionService {
   }
 
   async getAllTransactions(tokenId: string): Promise<ApiResponse<TransactionsMockModel[]>> {
-    this.createRandomTransactionsForAllTokens(tokenId, 5);
-    const transactions = await this.transactionModel.findAll({ order: [['createdAt', 'DESC']] });
-    return { success: true, data: transactions };
+    try {
+      this.createRandomTransactionsForAllTokens(tokenId, 5);
+      const transactions = await this.transactionModel.findAll({
+        where: { tokenId },
+        order: [['createdAt', 'DESC']],
+      });
+      return { success: true, data: transactions };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get transactions',
+      };
+    }
   }
 }
