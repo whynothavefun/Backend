@@ -10,6 +10,8 @@ import { ThreadMessageModel } from './token/models/thread-messages.entity';
 import { MessageLikesModel } from './token/models/message-likes.entity';
 import { ApiKeyGuard } from './common/guards/api-key.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { TransactionModule } from './transaction/transaction.module';
+import { TransactionsMockModel } from './transaction/models/transactions-mock.entity';
 
 @Module({
   imports: [
@@ -26,11 +28,12 @@ import { APP_GUARD } from '@nestjs/core';
         database: configService.get('PG_DATABASE'),
         autoLoadModels: configService.get('AUTO_LOAD_SEQUELIZE_MODELS'),
         synchronize: configService.get('SYNCHRONIZE_SEQUELIZE'),
-        models: [TokenModel, ThreadMessageModel, MessageLikesModel],
+        models: [TokenModel, ThreadMessageModel, MessageLikesModel, TransactionsMockModel],
         logging: false,
       }),
     }),
     TokenModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [
