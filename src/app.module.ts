@@ -11,7 +11,7 @@ import { MessageLikesModel } from './token/models/message-likes.entity';
 import { ApiKeyGuard } from './common/guards/api-key.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { TransactionModule } from './transaction/transaction.module';
-import { TransactionsMockModel } from './transaction/models/transactions-mock.entity';
+import { TransactionsModel } from './transaction/models/transactions-mock.entity';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { TransactionsMockModel } from './transaction/models/transactions-mock.en
         database: configService.get('PG_DATABASE'),
         autoLoadModels: configService.get('AUTO_LOAD_SEQUELIZE_MODELS'),
         synchronize: configService.get('SYNCHRONIZE_SEQUELIZE'),
-        models: [TokenModel, ThreadMessageModel, MessageLikesModel, TransactionsMockModel],
+        models: [TokenModel, ThreadMessageModel, MessageLikesModel, TransactionsModel],
         logging: false,
       }),
     }),

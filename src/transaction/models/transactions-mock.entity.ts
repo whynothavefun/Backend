@@ -2,8 +2,8 @@ import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from 'sequeli
 import { DataTypes } from 'sequelize';
 import { TokenModel } from 'src/token/models/token.entity';
 
-@Table({ tableName: 'transactions_mock' })
-export class TransactionsMockModel extends Model<TransactionsMockModel> {
+@Table({ tableName: 'transactions' })
+export class TransactionsModel extends Model<TransactionsModel> {
   @PrimaryKey
   @Column({
     type: DataTypes.UUID,
